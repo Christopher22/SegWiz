@@ -30,6 +30,7 @@ namespace SegWiz {
             explicit DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent = nullptr);
             virtual ~DrawingBuffer();
             void reset();
+            void reset(const QSize& size);
 
             void handleMouse(QMouseEvent *event);
             void handleMouse(QWheelEvent *event);
@@ -53,7 +54,7 @@ namespace SegWiz {
 
             void setLabel(const Label *label);
 
-            QPixmap m_buffer;
+            QPixmap* m_buffer;
             quint16 m_shapeSize;
             QPainter m_painter;
 

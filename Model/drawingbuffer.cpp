@@ -12,13 +12,16 @@
 
 namespace SegWiz {
     namespace Model {
-        DrawingBuffer::DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(size), m_shapeSize(5), m_painter(&m_buffer), m_shapes(), m_shapeId(0), m_dataset(dataset)
+        DrawingBuffer::DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(5), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
             connect(dataset, &Dataset::labelChanged, this, &DrawingBuffer::setLabel);
 
             m_shapes.append(new Shape::Square(this));
             m_shapes.append(new Shape::Circle(this));
+
+            m_buffer->fill(Qt::transparent);
+            m_painter.begin(m_buffer);
 
             m_painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
             this->setLabel(dataset->currentLabel());
@@ -33,7 +36,18 @@ namespace SegWiz {
 
         void DrawingBuffer::reset()
         {
-            m_painter.eraseRect(0, 0, m_buffer.width(), m_buffer.height());
+            m_painter.eraseRect(0, 0, m_buffer->width(), m_buffer->height());
+        }
+
+        void DrawingBuffer::reset(const QSize &size)
+        {
+            m_painter.end();
+
+            delete m_buffer;
+            m_buffer = new QPixmap(size);
+            m_buffer->fill(Qt::transparent);
+
+            m_painter.begin(m_buffer);
         }
 
         void DrawingBuffer::handleMouse(QMouseEvent *mouse)
@@ -57,7 +71,7 @@ namespace SegWiz {
 
         const QPixmap &DrawingBuffer::image() const
         {
-            return m_buffer;
+            return *m_buffer;
         }
 
         quint16 DrawingBuffer::shapeSize() const
@@ -72,12 +86,12 @@ namespace SegWiz {
 
         quint16 DrawingBuffer::width() const
         {
-            return m_buffer.width();
+            return m_buffer->width();
         }
 
         quint16 DrawingBuffer::height() const
         {
-            return m_buffer.height();
+            return m_buffer->height();
         }
 
         const Shape::Shape* DrawingBuffer::shape() const
