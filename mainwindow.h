@@ -3,13 +3,30 @@
 
 #include <QMainWindow>
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+namespace SegWiz {
+    namespace View {
+        class AnnotationWidget;
+    }
 
-public:
-    MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-};
+    namespace Model {
+        class Dataset;
+    }
+
+    class MainWindow : public QMainWindow
+    {
+        Q_OBJECT
+
+    public:
+        MainWindow(Model::Dataset* dataset  = nullptr, QWidget *parent = nullptr);
+
+    private:
+        void addFileMenu();
+        void addAnnotationMenu();
+        void addViewMenu();
+
+        Model::Dataset *m_data;
+        View::AnnotationWidget *m_annotation;
+    };
+}
 
 #endif // MAINWINDOW_H

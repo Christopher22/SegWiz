@@ -25,7 +25,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    Model/dataset.cpp \
+    Model/Shape/shape.cpp \
+    Model/Shape/circle.cpp \
+    Model/drawingbuffer.cpp \
+    View/annotationwidget.cpp \
+    Model/Shape/square.cpp \
+    Model/label.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    Model/dataset.h \
+    Model/Shape/shape.h \
+    Model/Shape/circle.h \
+    Model/drawingbuffer.h \
+    View/annotationwidget.h \
+    Model/Shape/square.h \
+    Model/label.h
