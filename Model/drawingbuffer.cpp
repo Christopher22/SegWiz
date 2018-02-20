@@ -15,7 +15,16 @@ namespace SegWiz {
         DrawingBuffer::DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(5), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
+
             connect(dataset, &Dataset::labelChanged, this, &DrawingBuffer::setLabel);
+            connect(dataset, &Dataset::saveAnnotation, [this](QImage& img) {
+                img = QImage(QSize(this->width(), this->height()), QImage::Format::Format_RGB32);
+                img.fill(Qt::black);
+
+                QPainter p(&img);
+                //p.setBackground(QBrush(Qt::black));
+                p.drawPixmap(QRect(0, 0, img.width(), img.height()), *m_buffer, QRect(0, 0, this->width(), this->height()));
+            });
 
             m_shapes.append(new Shape::Square(this));
             m_shapes.append(new Shape::Circle(this));
@@ -48,11 +57,17 @@ namespace SegWiz {
             m_buffer->fill(Qt::transparent);
 
             m_painter.begin(m_buffer);
+            this->setLabel(m_dataset->currentLabel());
         }
 
         void DrawingBuffer::handleMouse(QMouseEvent *mouse)
         {
-            if(mouse->buttons() & Qt::LeftButton) {
+            if(mouse->buttons() & Qt::LeftButton && mouse->modifiers() & Qt::ControlModifier) {
+                this->setEraser();
+                m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
+                this->setLabel(m_dataset->currentLabel());
+                emit painted();
+            } else if (mouse->buttons() & Qt::LeftButton) {
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
                 emit painted();
             }
@@ -94,14 +109,14 @@ namespace SegWiz {
             return m_buffer->height();
         }
 
-        const Shape::Shape* DrawingBuffer::shape() const
+        const Shape::Shape *DrawingBuffer::currentShape() const
         {
             return m_shapes[m_shapeId];
         }
 
-        bool DrawingBuffer::setShape(quint16 shapeId)
+        bool DrawingBuffer::setCurrentShape(quint16 shapeId)
         {
-            if(m_shapes.size() < shapeId) {
+            if(shapeId < m_shapes.size()) {
                 m_shapeId = shapeId;
                 return true;
             } else {
@@ -109,10 +124,26 @@ namespace SegWiz {
             }
         }
 
+        const Shape::Shape *DrawingBuffer::shape(quint16 shapeId) const
+        {
+            return shapeId < m_shapes.size() ? m_shapes[shapeId] : nullptr;
+        }
+
+        quint32 DrawingBuffer::shapes() const
+        {
+            return m_shapes.size();
+        }
+
         void DrawingBuffer::setLabel(const Label *label)
         {
-            m_painter.setBrush(label->color());
+            m_painter.setBrush(QBrush(label->color(), Qt::SolidPattern));
             m_painter.setPen(QPen(label->color(), m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        }
+
+        void DrawingBuffer::setEraser()
+        {
+            m_painter.setBrush(m_painter.background());
+            m_painter.setPen(QPen(m_painter.background(), m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         }
     }
 }

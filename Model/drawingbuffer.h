@@ -29,6 +29,7 @@ namespace SegWiz {
 
             explicit DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent = nullptr);
             virtual ~DrawingBuffer();
+
             void reset();
             void reset(const QSize& size);
 
@@ -43,8 +44,11 @@ namespace SegWiz {
             quint16 width() const;
             quint16 height() const;
 
-            const Shape::Shape *shape() const;
-            bool setShape(quint16 shapeId);
+            const Shape::Shape *currentShape() const;
+            bool setCurrentShape(quint16 shapeId);
+
+            const Shape::Shape *shape(quint16 shapeId) const;
+            quint32 shapes() const;
 
         signals:
             void painted();
@@ -53,6 +57,7 @@ namespace SegWiz {
             Q_DISABLE_COPY(DrawingBuffer)
 
             void setLabel(const Label *label);
+            void setEraser();
 
             QPixmap* m_buffer;
             quint16 m_shapeSize;

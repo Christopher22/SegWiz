@@ -14,15 +14,18 @@ namespace SegWiz {
         {
             Q_OBJECT
         public:
-            explicit Dataset(QObject *parent = nullptr);
+            explicit Dataset(const QDir& output, const QString& outputFilename="%1.png", QObject *parent = nullptr);
             virtual ~Dataset();
 
-            bool addImages(const QDir &dir, const QStringList &include, const QStringList &exclude);
+            bool addImages(const QDir &dir, const QStringList &include = {"*.bmp", "*.png", "*.jpg"}, const QStringList &exclude = QStringList());
             void addLabel(const QString& name, const QColor& color);
-            bool next();
+
+            bool next(bool save);
 
             bool setCurrentLabel(quint16 label);
             const Label *currentLabel() const;
+            const Label *label(quint16 label) const;
+            quint32 labels() const;
 
             void setSeed(quint32 seed);
 
@@ -33,6 +36,7 @@ namespace SegWiz {
             void setEnd(quint32 end);
 
         signals:
+            void saveAnnotation(QImage &output);
             void labelChanged(const Label* label);
             void dataChanged(const QImage& image);
 
@@ -42,7 +46,7 @@ namespace SegWiz {
                 Location(const QDir& dir, const QStringList& include, const QStringList& exclude);
                 explicit operator bool() const;
 
-                QDir nextImage(QRandomGenerator& random);
+                QFile* nextImage(QRandomGenerator &random);
                 QStringList include() const;
                 QStringList exclude() const;
                 QDir dir() const;
@@ -58,7 +62,9 @@ namespace SegWiz {
             QVector<Label*> m_labels;
             QVector<Location*> m_locations;
             quint16 m_currentLabel;
-            QDir m_currentFile;
+            QFile *m_currentFile;
+            QDir m_output;
+            QString m_outputFileFormat;
         };
     }
 }

@@ -10,7 +10,8 @@ namespace SegWiz {
             {
             public:
                 explicit Circle(const DrawingBuffer *annotator);
-                void draw(QPainter* painter, const QPoint& position);
+                void draw(QPainter* painter, const QPoint& position) override;
+                QString name() const override;
             };
         }
     }

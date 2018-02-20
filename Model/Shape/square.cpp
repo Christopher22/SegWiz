@@ -17,6 +17,11 @@ namespace SegWiz {
                 quint16 shapeSize = m_annotator->shapeSize();
                 painter->drawRect(QRectF(qreal(position.x()) - qreal(shapeSize) / 2, qreal(position.y()) - qreal(shapeSize) / 2, shapeSize, shapeSize));
             }
+
+            QString Square::name() const
+            {
+                return QString("Square");
+            }
         }
     }
 }

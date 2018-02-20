@@ -16,6 +16,11 @@ namespace SegWiz {
             {
                 painter->drawEllipse(position, m_annotator->shapeSize(), m_annotator->shapeSize());
             }
+
+            QString Circle::name() const
+            {
+                return QString("Circle");
+            }
         }
     }
 }

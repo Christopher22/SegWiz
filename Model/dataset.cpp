@@ -6,9 +6,15 @@
 
 namespace SegWiz {
     namespace Model {
-        Dataset::Dataset(QObject *parent) : QObject(parent), m_currentLabel(0)
+        Dataset::Dataset(const QDir &output, const QString &outputFilename, QObject *parent) :
+            QObject(parent),
+            m_currentLabel(0),
+            m_currentFile(nullptr),
+            m_output(output),
+            m_outputFileFormat(outputFilename)
         {
-            m_labels.append(new Label("Background", QColor(0, 0, 0)));
+            Q_ASSERT(output.exists());
+            m_labels.append(new Label("Background", QColor(0, 0, 0, 0)));
         }
 
         Dataset::~Dataset()
@@ -27,7 +33,7 @@ namespace SegWiz {
         bool Dataset::addImages(const QDir &dir, const QStringList &include, const QStringList &exclude)
         {
             Location* location = new Location(dir, include, exclude);
-            if(*location) {
+            if(location->files() > 0) {
                 m_locations.append(location);
                 m_end += location->files();
                 return true;
@@ -40,6 +46,11 @@ namespace SegWiz {
         void Dataset::addLabel(const QString &name, const QColor &color)
         {
             m_labels.append(new Label(name, color));
+
+            // Ignore default label
+            if(m_labels.size() == 2) {
+                this->setCurrentLabel(1);
+            }
         }
 
         bool Dataset::setCurrentLabel(quint16 label)
@@ -58,33 +69,56 @@ namespace SegWiz {
             return m_labels[m_currentLabel];
         }
 
+        const Label *Dataset::label(quint16 label) const
+        {
+            return label < m_labels.size() ? m_labels[label] : nullptr;
+        }
+
+        quint32 Dataset::labels() const
+        {
+            return m_labels.size();
+        }
+
         void Dataset::setSeed(quint32 seed)
         {
             m_random.seed(seed);
         }
 
-        bool Dataset::next()
+        bool Dataset::next(bool save)
         {
+            if(save && m_currentFile) {
+                QImage output;
+                emit saveAnnotation(output);
+                if(!output.isNull()) {
+                    const QString currentFilename(m_currentFile->fileName());
+                    const int lastPart = currentFilename.lastIndexOf('/') + 1;
+
+                    QString name(m_outputFileFormat.arg(currentFilename.mid(lastPart, currentFilename.lastIndexOf('.') - lastPart)));
+                    output.save(m_output.filePath(name));
+                }
+            }
+
             QImage img;
             do {
+                if(m_currentFile) {
+                    delete m_currentFile;
+                    m_currentFile = nullptr;
+                }
+
                 do {
                     if(m_current >= m_end || m_locations.size() == 0) {
                         return false;
                     }
                     quint32 index = m_random.bounded(m_locations.size());
                     m_currentFile = m_locations[index]->nextImage(m_random);
-                    if(!(*m_locations[index])) {
+                    if(!m_currentFile) {
                         delete m_locations[index];
                         m_locations.removeAt(index);
                     }
-                    ++m_current;
-                } while(m_current < m_start);
-
-                img = QImage(m_currentFile.path());
-                if(img.isNull()) {
-                    qWarning() << "Image file " << m_currentFile << "invalid. Loading next...";
-                }
+                } while(!m_currentFile);
+                img = QImage(m_currentFile->fileName());
             } while(img.isNull());
+            ++m_current;
 
             emit dataChanged(img);
             return true;
@@ -129,16 +163,20 @@ namespace SegWiz {
             return m_files.size() > 0;
         }
 
-        QDir Dataset::Location::nextImage(QRandomGenerator &random)
+        QFile *Dataset::Location::nextImage(QRandomGenerator &random)
         {
-            QDir result;
-            if(m_files.size() > 0) {
-                do {
-                    quint32 index = random.bounded(m_files.size());
-                    result = m_dir.filePath(m_files.at(index));
-                    m_files.removeAt(index);
-                } while(!result.exists());
-            }
+            QFile *result = nullptr;
+            do {
+                if(m_files.size() == 0) {
+                    return nullptr;
+                } else if(result) {
+                    delete result;
+                }
+
+                quint32 index = random.bounded(m_files.size());
+                result = new QFile(m_dir.filePath(m_files.at(index)));
+                m_files.removeAt(index);
+            } while(!result->exists());
             return result;
         }
 
