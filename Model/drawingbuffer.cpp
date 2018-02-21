@@ -66,14 +66,12 @@ namespace SegWiz {
         {
             if (mouse->buttons() & Qt::LeftButton) {
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
-                emit painted();
             } else if(mouse->buttons() & Qt::RightButton) {
                 this->setEraser();
                 m_painter.setCompositionMode (QPainter::CompositionMode_Source);
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
                 m_painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
                 this->setLabel(m_dataset->currentLabel());
-                emit painted();
             } else if(mouse->buttons() & Qt::ForwardButton) {
                 m_dataset->nextLabel();
             } else if(mouse->buttons() & Qt::BackButton) {
@@ -117,7 +115,7 @@ namespace SegWiz {
             return m_buffer->height();
         }
 
-        const Shape::Shape *DrawingBuffer::currentShape() const
+        Shape::Shape *DrawingBuffer::currentShape()
         {
             return m_shapes[m_shapeId];
         }
@@ -126,6 +124,7 @@ namespace SegWiz {
         {
             if(shapeId < m_shapes.size()) {
                 m_shapeId = shapeId;
+                emit shapeChanged();
                 return true;
             } else {
                 return false;

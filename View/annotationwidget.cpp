@@ -2,6 +2,8 @@
 
 #include "../Model/drawingbuffer.h"
 #include "../Model/dataset.h"
+#include "../Model/label.h"
+#include "../Model/Shape/shape.h"
 
 #include <QPaintEvent>
 
@@ -16,9 +18,13 @@ namespace SegWiz {
         {
             this->resize(300, 300);
             this->setMouseTracking(true);
+            this->setAutoFillBackground(true);
+            this->setCursor(Qt::CrossCursor);
 
-            connect(m_buffer, SIGNAL(painted()), this, SLOT(repaint()));
             connect(m_data, &Model::Dataset::dataChanged, this, &AnnotationWidget::changeImage);
+            connect(m_buffer, &Model::DrawingBuffer::shapeChanged, [this]() {
+                this->repaint();
+            });
         }
 
         void AnnotationWidget::paintEvent(QPaintEvent *paint)
@@ -29,6 +35,11 @@ namespace SegWiz {
                     painter.drawImage(paint->rect(), m_currentImage, paint->rect());
                     painter.setOpacity(m_opacity);
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
+
+                    // Draw overlay
+                    painter.setPen(QPen(QBrush(m_data->currentLabel()->color()), 3));
+                    m_buffer->currentShape()->draw(&painter, m_overlayPos);
+
                 } else if (m_mode == ViewingMode::OverlayOnly) {
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
                 } else {
@@ -40,12 +51,15 @@ namespace SegWiz {
         void AnnotationWidget::wheelEvent(QWheelEvent *event)
         {
             m_buffer->handleMouse(event);
+            this->repaint();
         }
 
         void AnnotationWidget::mouseMoveEvent(QMouseEvent *event)
         {
+            m_overlayPos = event->pos();
             if (m_mode != ViewingMode::ImageOnly) {
                 m_buffer->handleMouse(event);
+                this->repaint();
             }
         }
 

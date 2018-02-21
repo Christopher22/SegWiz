@@ -219,6 +219,7 @@ namespace SegWiz {
         {
             if(m_labels.size() > 1) {
                 m_currentLabel = (m_currentLabel == m_labels.size() - 1 ? 1 : m_currentLabel + 1);
+                emit labelChanged(m_labels[m_currentLabel]);
             }
         }
 
@@ -226,6 +227,7 @@ namespace SegWiz {
         {
             if(m_labels.size() > 1) {
                 m_currentLabel = (m_currentLabel == 1 ? m_labels.size() - 1 : m_currentLabel - 1);
+                emit labelChanged(m_labels[m_currentLabel]);
             }
         }
 

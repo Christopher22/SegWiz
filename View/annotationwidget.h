@@ -34,6 +34,7 @@ namespace SegWiz {
         private:
             void changeImage(const QImage& image);
 
+            QPoint m_overlayPos;
             Model::DrawingBuffer *m_buffer;
             const Model::Dataset *m_data;
             QImage m_currentImage;

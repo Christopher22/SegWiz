@@ -44,14 +44,14 @@ namespace SegWiz {
             quint16 width() const;
             quint16 height() const;
 
-            const Shape::Shape *currentShape() const;
+            Shape::Shape *currentShape();
             bool setCurrentShape(quint16 shapeId);
 
             const Shape::Shape *shape(quint16 shapeId) const;
             quint32 shapes() const;
 
         signals:
-            void painted();
+            void shapeChanged();
 
         private:
             Q_DISABLE_COPY(DrawingBuffer)
