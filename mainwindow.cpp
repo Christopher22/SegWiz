@@ -21,7 +21,7 @@ namespace SegWiz {
         this->setFixedSize(m_annotation->size());
 
         connect(dataset, &Model::Dataset::dataChanged, [this](const QImage& image) {
-            this->setFixedSize(image.size());
+            this->setFixedSize(image.width(), image.height() + this->menuBar()->height());
         });
 
         // Add menu

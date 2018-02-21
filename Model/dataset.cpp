@@ -3,17 +3,28 @@
 #include "label.h"
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 namespace SegWiz {
     namespace Model {
         Dataset::Dataset(const QDir &output, const QString &outputFilename, QObject *parent) :
             QObject(parent),
+            m_seed(QRandomGenerator::global()->generate()),
+            m_random(QRandomGenerator(m_seed)),
             m_currentLabel(0),
             m_currentFile(nullptr),
             m_output(output),
             m_outputFileFormat(outputFilename)
         {
             Q_ASSERT(output.exists());
+
+            if(!outputFilename.contains("%1")) {
+                qWarning("Invalid pattern. Using default.");
+                m_outputFileFormat = QString("%1.png");
+            }
+
             m_labels.append(new Label("Background", QColor(0, 0, 0, 0)));
         }
 
@@ -28,6 +39,131 @@ namespace SegWiz {
                 delete location;
                 location = nullptr;
             }
+        }
+
+        bool Dataset::save(QFile* file) const
+        {
+            if(!file->open(QFile::WriteOnly)) {
+                return false;
+            }
+
+            QJsonObject config;
+            config.insert("start", QJsonValue(qint64(m_current)));
+            config.insert("end", QJsonValue(qint64(m_end)));
+            config.insert("seed", QJsonValue(qint64(m_seed)));
+
+            QJsonArray labels;
+            for(int i = 1; i < m_labels.size(); i++) {
+                QJsonObject label;
+                label.insert("name", QJsonValue(m_labels[i]->name()));
+
+                QJsonObject color;
+                color.insert("r", QJsonValue(m_labels[i]->color().red()));
+                color.insert("g", QJsonValue(m_labels[i]->color().green()));
+                color.insert("b", QJsonValue(m_labels[i]->color().blue()));
+                label.insert("color", QJsonValue(color));
+
+                labels.append(label);
+            }
+            config.insert("labels", QJsonValue(labels));
+
+            QJsonArray input;
+            for(const Location* loc: m_locations) {
+                QJsonObject location;
+                location.insert("path", QJsonValue(loc->dir().path()));
+                location.insert("include", QJsonValue(QJsonArray::fromStringList(loc->include())));
+                location.insert("exclude", QJsonValue(QJsonArray::fromStringList(loc->exclude())));
+                input.append(location);
+            }
+            config.insert("input", QJsonValue(input));
+
+            QJsonObject output;
+            output.insert("path", QJsonValue(m_output.path()));
+            output.insert("pattern", QJsonValue(m_outputFileFormat));
+            config.insert("output", QJsonValue(output));
+
+            file->write(QJsonDocument(config).toJson(QJsonDocument::Indented));
+            file->close();
+            return true;
+        }
+
+        Dataset *Dataset::load(QFile* file, QObject *parent)
+        {
+            if(!file->open(QFile::ReadOnly)) {
+                return nullptr;
+            }
+
+            QJsonDocument input(QJsonDocument::fromJson(file->readAll()));
+            file->close();
+
+            if(input.isNull()) {
+                return nullptr;
+            }
+
+            QJsonObject config(input.object());
+            if(!config["output"].isObject() || !config["input"].isArray()) {
+                return nullptr;
+            }
+
+            QJsonObject outputObject(config["output"].toObject());
+            QDir output(outputObject["path"].toString("/invalid/"));
+            QString outputPattern(outputObject["pattern"].toString("%1.png"));
+            if(!output.exists()) {
+                qWarning("The output folder does not exists!");
+                return nullptr;
+            }
+
+            Dataset *data = new Dataset(output, outputPattern, parent);
+            for(const QJsonValue& inputElement: config["input"].toArray()) {
+                QJsonObject inputObject(inputElement.toObject());
+                if(!inputElement.isObject() || !inputObject["path"].isString() || !inputObject["include"].isArray() || !inputObject["exclude"].isArray()) {
+                    delete data;
+                    return nullptr;
+                }
+
+                QDir input(inputObject["path"].toString());
+                if(!input.exists()) {
+                    qWarning() << "The input folder " << input << "does not exists!";
+                    return nullptr;
+                }
+
+                QStringList include;
+                for(const QJsonValue& currentInclude: inputObject["include"].toArray()) {
+                    include.append(currentInclude.toString());
+                }
+
+                QStringList exclude;
+                for(const QJsonValue& currentExclude: inputObject["exclude"].toArray()) {
+                    exclude.append(currentExclude.toString());
+                }
+
+                data->addImages(input, include, exclude);
+            }
+
+            for(const QJsonValue& labelElement: config["labels"].toArray()) {
+                QJsonObject labelObject(labelElement.toObject());
+                if(!labelElement.isObject() || !labelElement["name"].isString() || !labelElement["color"].isObject()) {
+                    delete data;
+                    return nullptr;
+                }
+
+                QJsonObject color(labelElement["color"].toObject());
+                data->addLabel(labelElement["name"].toString(), QColor(quint32(color["r"].toDouble()), quint32(color["g"].toDouble()), quint32(color["b"].toDouble())));
+            }
+
+            if(config["start"].isDouble()) {
+                data->setStart(config["start"].toDouble());
+            }
+
+            if(config["end"].isDouble()) {
+                data->setEnd(config["end"].toDouble());
+            }
+
+            if(config["seed"].isDouble()) {
+                data->setSeed(config["seed"].toDouble());
+            }
+
+            return data;
         }
 
         bool Dataset::addImages(const QDir &dir, const QStringList &include, const QStringList &exclude)
@@ -79,9 +215,24 @@ namespace SegWiz {
             return m_labels.size();
         }
 
+        void Dataset::nextLabel()
+        {
+            if(m_labels.size() > 1) {
+                m_currentLabel = (m_currentLabel == m_labels.size() - 1 ? 1 : m_currentLabel + 1);
+            }
+        }
+
+        void Dataset::previousLabel()
+        {
+            if(m_labels.size() > 1) {
+                m_currentLabel = (m_currentLabel == 1 ? m_labels.size() - 1 : m_currentLabel - 1);
+            }
+        }
+
         void Dataset::setSeed(quint32 seed)
         {
-            m_random.seed(seed);
+            m_seed = seed;
+            m_random.seed(m_seed);
         }
 
         bool Dataset::next(bool save)

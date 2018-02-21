@@ -7,6 +7,8 @@
 #include <QDir>
 #include <QRandomGenerator>
 
+class QFile;
+
 namespace SegWiz {
     namespace Model {
         class Label;
@@ -17,6 +19,9 @@ namespace SegWiz {
             explicit Dataset(const QDir& output, const QString& outputFilename="%1.png", QObject *parent = nullptr);
             virtual ~Dataset();
 
+            static Dataset *load(QFile* file, QObject *parent = nullptr);
+            bool save(QFile* file) const;
+
             bool addImages(const QDir &dir, const QStringList &include = {"*.bmp", "*.png", "*.jpg"}, const QStringList &exclude = QStringList());
             void addLabel(const QString& name, const QColor& color);
 
@@ -26,6 +31,8 @@ namespace SegWiz {
             const Label *currentLabel() const;
             const Label *label(quint16 label) const;
             quint32 labels() const;
+            void nextLabel();
+            void previousLabel();
 
             void setSeed(quint32 seed);
 
@@ -57,6 +64,7 @@ namespace SegWiz {
                 QStringList m_files;
             };
 
+            quint32 m_seed;
             QRandomGenerator m_random;
             quint32 m_current, m_start, m_end;
             QVector<Label*> m_labels;
