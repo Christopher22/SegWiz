@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QImage>
-
+#include <QPen>
 namespace SegWiz {
     namespace Model {
         class DrawingBuffer;
@@ -41,6 +41,7 @@ namespace SegWiz {
             QImage m_currentImage;
             ViewingMode m_mode;
             qreal m_opacity;
+            QPen m_overlayPen;
         };
     }
 }

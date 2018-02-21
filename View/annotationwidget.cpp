@@ -14,7 +14,8 @@ namespace SegWiz {
             m_buffer(new Model::DrawingBuffer(dataset, QSize(300, 300), parent)),
             m_data(dataset),
             m_mode(ViewingMode::All),
-            m_opacity(0.2)
+            m_opacity(0.2),
+            m_overlayPen(QPen(QBrush(m_data->currentLabel()->color()), 5))
         {
             this->resize(300, 300);
             this->setMouseTracking(true);
@@ -22,6 +23,11 @@ namespace SegWiz {
             this->setCursor(Qt::CrossCursor);
 
             connect(m_data, &Model::Dataset::dataChanged, this, &AnnotationWidget::changeImage);
+            connect(m_data, &Model::Dataset::labelChanged, this, [this](const Model::Label* label) {
+                m_overlayPen.setColor(label->color());
+                this->repaint();
+            });
+
             connect(m_buffer, &Model::DrawingBuffer::shapeChanged, [this]() {
                 this->repaint();
             });
@@ -37,9 +43,8 @@ namespace SegWiz {
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
 
                     // Draw overlay
-                    painter.setPen(QPen(QBrush(m_data->currentLabel()->color()), 3));
+                    painter.setPen(m_overlayPen);
                     m_buffer->currentShape()->draw(&painter, m_overlayPos);
-
                 } else if (m_mode == ViewingMode::OverlayOnly) {
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
                 } else {

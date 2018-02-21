@@ -12,7 +12,7 @@
 
 namespace SegWiz {
     namespace Model {
-        DrawingBuffer::DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(5), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
+        DrawingBuffer::DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(10), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
 
@@ -22,7 +22,6 @@ namespace SegWiz {
                 img.fill(Qt::black);
 
                 QPainter p(&img);
-                //p.setBackground(QBrush(Qt::black));
                 p.drawPixmap(QRect(0, 0, img.width(), img.height()), *m_buffer, QRect(0, 0, this->width(), this->height()));
             });
 
