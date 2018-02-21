@@ -45,7 +45,9 @@ namespace SegWiz {
 
         void DrawingBuffer::reset()
         {
-            m_painter.eraseRect(0, 0, m_buffer->width(), m_buffer->height());
+            m_painter.setCompositionMode (QPainter::CompositionMode_Source);
+            m_painter.fillRect(QRect(0, 0, m_buffer->width(), m_buffer->height()), Qt::transparent);
+            m_painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
         }
 
         void DrawingBuffer::reset(const QSize &size)
