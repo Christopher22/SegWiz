@@ -67,7 +67,9 @@ namespace SegWiz {
                 emit painted();
             } else if(mouse->buttons() & Qt::RightButton) {
                 this->setEraser();
+                m_painter.setCompositionMode (QPainter::CompositionMode_Source);
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
+                m_painter.setCompositionMode (QPainter::CompositionMode_SourceOver);
                 this->setLabel(m_dataset->currentLabel());
                 emit painted();
             } else if(mouse->buttons() & Qt::ForwardButton) {
@@ -146,8 +148,8 @@ namespace SegWiz {
 
         void DrawingBuffer::setEraser()
         {
-            m_painter.setBrush(m_painter.background());
-            m_painter.setPen(QPen(m_painter.background(), m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            m_painter.setBrush(Qt::transparent);
+            m_painter.setPen(QPen(Qt::transparent, m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         }
     }
 }
