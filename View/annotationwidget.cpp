@@ -54,6 +54,15 @@ namespace SegWiz {
             this->repaint();
         }
 
+        void AnnotationWidget::mousePressEvent(QMouseEvent *event)
+        {
+            m_overlayPos = event->pos();
+            if (m_mode != ViewingMode::ImageOnly) {
+                m_buffer->handleMouse(event);
+                this->repaint();
+            }
+        }
+
         void AnnotationWidget::mouseMoveEvent(QMouseEvent *event)
         {
             m_overlayPos = event->pos();
