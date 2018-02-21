@@ -20,6 +20,10 @@ namespace SegWiz {
         this->setCentralWidget(m_annotation);
         this->setFixedSize(m_annotation->size());
 
+        connect(dataset, &Model::Dataset::dataChanged, [this](const QImage& image) {
+            this->setFixedSize(image.size());
+        });
+
         // Add menu
         this->addFileMenu();
         this->addAnnotationMenu();
