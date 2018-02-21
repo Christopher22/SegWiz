@@ -7,7 +7,7 @@
 
 namespace SegWiz {
     namespace View {
-        AnnotationWidget::AnnotationWidget(const Model::Dataset *dataset, QWidget *parent) :
+        AnnotationWidget::AnnotationWidget(Model::Dataset *dataset, QWidget *parent) :
             QWidget(parent),
             m_buffer(new Model::DrawingBuffer(dataset, QSize(300, 300), parent)),
             m_data(dataset),

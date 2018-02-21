@@ -27,7 +27,7 @@ namespace SegWiz {
             static const quint16 MIN_SHAPE_SIZE = 1;
             static const quint16 MAX_SHAPE_SIZE = 100;
 
-            explicit DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent = nullptr);
+            explicit DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent = nullptr);
             virtual ~DrawingBuffer();
 
             void reset();
@@ -66,7 +66,7 @@ namespace SegWiz {
             QVector<Shape::Shape*> m_shapes;
             int m_shapeId;
 
-            const Dataset *m_dataset;
+            Dataset *m_dataset;
         };
     }
 }

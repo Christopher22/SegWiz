@@ -19,7 +19,7 @@ namespace SegWiz {
         public:
             enum ViewingMode { All, OverlayOnly, ImageOnly };
 
-            explicit AnnotationWidget(const Model::Dataset* dataset, QWidget *parent = nullptr);
+            explicit AnnotationWidget(Model::Dataset *dataset, QWidget *parent = nullptr);
 
             ViewingMode mode() const;
             void setMode(ViewingMode mode);

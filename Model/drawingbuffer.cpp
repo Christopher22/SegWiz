@@ -12,7 +12,7 @@
 
 namespace SegWiz {
     namespace Model {
-        DrawingBuffer::DrawingBuffer(const Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(5), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
+        DrawingBuffer::DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(5), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
 
@@ -62,14 +62,18 @@ namespace SegWiz {
 
         void DrawingBuffer::handleMouse(QMouseEvent *mouse)
         {
-            if(mouse->buttons() & Qt::LeftButton && mouse->modifiers() & Qt::ControlModifier) {
+            if (mouse->buttons() & Qt::LeftButton) {
+                m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
+                emit painted();
+            } else if(mouse->buttons() & Qt::RightButton) {
                 this->setEraser();
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
                 this->setLabel(m_dataset->currentLabel());
                 emit painted();
-            } else if (mouse->buttons() & Qt::LeftButton) {
-                m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
-                emit painted();
+            } else if(mouse->buttons() & Qt::ForwardButton) {
+                m_dataset->nextLabel();
+            } else if(mouse->buttons() & Qt::BackButton) {
+                m_dataset->previousLabel();
             }
         }
 
