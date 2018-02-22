@@ -51,6 +51,7 @@ namespace SegWiz {
             config.insert("start", QJsonValue(qint64(m_current)));
             config.insert("end", QJsonValue(qint64(m_end)));
             config.insert("seed", QJsonValue(qint64(m_seed)));
+            config.insert("scaling", QJsonValue(m_scalingFactor));
 
             QJsonArray labels;
             for(int i = 1; i < m_labels.size(); i++) {
@@ -163,6 +164,10 @@ namespace SegWiz {
                 data->setSeed(config["seed"].toDouble());
             }
 
+            if(config["scaling"].isDouble()) {
+                data->setScalingFactor(config["scaling"].toDouble());
+            }
+
             return data;
         }
 
@@ -246,6 +251,10 @@ namespace SegWiz {
                     const QString currentFilename(m_currentFile->fileName());
                     const int lastPart = currentFilename.lastIndexOf('/') + 1;
 
+                    if(m_scalingFactor != 1.0) {
+                        output = output.scaled(output.size() / m_scalingFactor, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                    }
+
                     QString name(m_outputFileFormat.arg(currentFilename.mid(lastPart, currentFilename.lastIndexOf('.') - lastPart)));
                     output.save(m_output.filePath(name));
                 }
@@ -273,6 +282,10 @@ namespace SegWiz {
             } while(img.isNull());
             ++m_current;
 
+            if(m_scalingFactor != 1.0) {
+                img = img.scaled(img.size() * m_scalingFactor, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+
             emit dataChanged(img);
             return true;
         }
@@ -295,6 +308,27 @@ namespace SegWiz {
         void Dataset::setEnd(quint32 end)
         {
             m_end = end;
+        }
+
+        qreal Dataset::scalingFactor() const
+        {
+            return m_scalingFactor;
+        }
+
+        bool Dataset::setScalingFactor(qreal scalingFactor)
+        {
+            // Forbid resetting once loaded
+            if(!m_currentFile) {
+                m_scalingFactor = scalingFactor;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        quint32 Dataset::currentElement() const
+        {
+            return m_current;
         }
 
         Dataset::Location::Location(const QDir &dir, const QStringList &include, const QStringList &exclude):

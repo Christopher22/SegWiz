@@ -42,6 +42,10 @@ namespace SegWiz {
             quint32 end() const;
             void setEnd(quint32 end);
 
+            qreal scalingFactor() const;
+            bool setScalingFactor(qreal scalingFactor);
+
+            quint32 currentElement() const;
         signals:
             void saveAnnotation(QImage &output);
             void labelChanged(const Label* label);
@@ -75,6 +79,7 @@ namespace SegWiz {
             QFile *m_currentFile;
             QDir m_output;
             QString m_outputFileFormat;
+            qreal m_scalingFactor;
         };
     }
 }
