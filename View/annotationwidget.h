@@ -25,6 +25,7 @@ namespace SegWiz {
             void setMode(ViewingMode mode);
             void reset();
             Model::DrawingBuffer* annotation();
+            void showCursor(bool show);
 
         protected:
             void paintEvent(QPaintEvent *event) override;

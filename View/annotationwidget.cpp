@@ -15,12 +15,12 @@ namespace SegWiz {
             m_data(dataset),
             m_mode(ViewingMode::All),
             m_opacity(0.2),
-            m_overlayPen(QPen(QBrush(m_data->currentLabel()->color()), 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
+            m_overlayPen(QPen(QBrush(m_data->currentLabel()->color()), m_buffer->shapeSize(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
         {
             this->resize(300, 300);
             this->setMouseTracking(true);
             this->setAutoFillBackground(true);
-            this->setCursor(Qt::CrossCursor);
+            this->showCursor(false);
 
             connect(m_data, &Model::Dataset::dataChanged, this, &AnnotationWidget::changeImage);
             connect(m_data, &Model::Dataset::labelChanged, this, [this](const Model::Label* label) {
@@ -113,6 +113,11 @@ namespace SegWiz {
         Model::DrawingBuffer *AnnotationWidget::annotation()
         {
             return m_buffer;
+        }
+
+        void AnnotationWidget::showCursor(bool show)
+        {
+            this->setCursor(show ? Qt::CrossCursor : Qt::BlankCursor);
         }
     }
 }

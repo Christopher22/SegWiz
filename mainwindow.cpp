@@ -113,6 +113,15 @@ namespace SegWiz {
 
     void MainWindow::addViewMenu()
     {
+        QAction* showCursor = new QAction(tr("&Show cursor"), this);
+        showCursor->setCheckable(true);
+        showCursor->setChecked(false);
+        showCursor->setShortcut(QKeySequence(Qt::Key_C));
+        showCursor->setStatusTip(tr("Show cursor"));
+        connect(showCursor, &QAction::toggled, [this](bool checked) {
+            m_annotation->showCursor(checked);
+        });
+
         QAction* zoomIn = new QAction(tr("&Zoom in"), this);
         zoomIn->setShortcut(QKeySequence::ZoomIn);
         zoomIn->setStatusTip(tr("Zoom in"));
@@ -148,6 +157,8 @@ namespace SegWiz {
         });
 
         QMenu* viewMenu = this->menuBar()->addMenu(tr("&View"));
+        viewMenu->addAction(showCursor);
+        viewMenu->addSeparator();
         viewMenu->addAction(zoomIn);
         viewMenu->addAction(zoomOut);
         viewMenu->addSeparator()->setText(tr("Current view"));
