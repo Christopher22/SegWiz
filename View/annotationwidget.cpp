@@ -90,6 +90,8 @@ namespace SegWiz {
             this->resize(m_currentImage.width(), m_currentImage.height());
             m_buffer->reset(m_currentImage.size());
 
+            // Reset mode for convenience
+            m_mode = ViewingMode::All;
             this->repaint();
         }
 
