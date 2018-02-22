@@ -95,6 +95,18 @@ namespace SegWiz {
             this->repaint();
         }
 
+        qreal AnnotationWidget::opacity() const
+        {
+            return m_opacity;
+        }
+
+        void AnnotationWidget::setOpacity(qreal opacity)
+        {
+            if(opacity >= 0.0 && opacity <= 1.0) {
+                m_opacity = opacity;
+            }
+        }
+
         AnnotationWidget::ViewingMode AnnotationWidget::mode() const
         {
             return m_mode;

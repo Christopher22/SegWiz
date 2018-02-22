@@ -27,6 +27,9 @@ namespace SegWiz {
             Model::DrawingBuffer* annotation();
             void showCursor(bool show);
 
+            qreal opacity() const;
+            void setOpacity(qreal opacity);
+
         protected:
             void paintEvent(QPaintEvent *event) override;
             void wheelEvent(QWheelEvent *event) override;

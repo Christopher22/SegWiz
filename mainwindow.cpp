@@ -10,6 +10,7 @@
 #include <QMenuBar>
 #include <QWidgetAction>
 #include <QLabel>
+#include <QInputDialog>
 
 namespace SegWiz {
     MainWindow::MainWindow(Model::Dataset *dataset, QWidget *parent)
@@ -114,6 +115,26 @@ namespace SegWiz {
 
     void MainWindow::addViewMenu()
     {
+        QAction* markerVisibility = new QAction(tr("&Set marker opacity"), this);
+        markerVisibility->setShortcut(QKeySequence(Qt::Key_M));
+        markerVisibility->setStatusTip(tr("Set the opacity of the marker"));
+        connect(markerVisibility, &QAction::triggered, [this] {
+            bool ok;
+            double newOpacity = QInputDialog::getDouble(this,
+                        tr("Set marker visibility"),
+                        tr("Please enter marker opacity (0: Hidden, 1: Completely visible):"),
+                        m_annotation->opacity(),
+                        0.0,
+                        1.0,
+                        2,
+                        &ok
+            );
+            if (ok) {
+                m_annotation->setOpacity(newOpacity);
+                m_annotation->repaint();
+            }
+        });
+
         QAction* showCursor = new QAction(tr("&Show cursor"), this);
         showCursor->setCheckable(true);
         showCursor->setChecked(false);
@@ -158,6 +179,7 @@ namespace SegWiz {
         });
 
         QMenu* viewMenu = this->menuBar()->addMenu(tr("&View"));
+        viewMenu->addAction(markerVisibility);
         viewMenu->addAction(showCursor);
         /*viewMenu->addSeparator();
         viewMenu->addAction(zoomIn);
