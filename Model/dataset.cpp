@@ -271,11 +271,14 @@ namespace SegWiz {
                     if(m_current >= m_end || m_locations.size() == 0) {
                         return false;
                     }
-                    quint32 index = m_random.bounded(m_locations.size());
-                    m_currentFile = m_locations[index]->nextImage(m_random);
-                    if(!m_currentFile) {
-                        delete m_locations[index];
-                        m_locations.removeAt(index);
+
+                    for(; m_current < m_start; ++m_current) {
+                        quint32 index = m_random.bounded(m_locations.size());
+                        m_currentFile = m_locations[index]->nextImage(m_random);
+                        if(!m_currentFile) {
+                            delete m_locations[index];
+                            m_locations.removeAt(index);
+                        }
                     }
                 } while(!m_currentFile);
                 img = QImage(m_currentFile->fileName());

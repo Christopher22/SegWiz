@@ -22,6 +22,7 @@ namespace SegWiz {
 
         connect(dataset, &Model::Dataset::dataChanged, [this](const QImage& image) {
             this->setFixedSize(image.width(), image.height() + this->menuBar()->height());
+            this->setWindowTitle(QString("SegWiz: %1").arg(m_data->currentElement(), 3, 10, QChar('0')));
         });
 
         // Add menu
@@ -122,13 +123,13 @@ namespace SegWiz {
             m_annotation->showCursor(checked);
         });
 
-        QAction* zoomIn = new QAction(tr("&Zoom in"), this);
+        /*QAction* zoomIn = new QAction(tr("&Zoom in"), this);
         zoomIn->setShortcut(QKeySequence::ZoomIn);
         zoomIn->setStatusTip(tr("Zoom in"));
 
         QAction* zoomOut = new QAction(tr("&Zoom out"), this);
         zoomOut->setShortcut(QKeySequence::ZoomOut);
-        zoomOut->setStatusTip(tr("Zoom out"));
+        zoomOut->setStatusTip(tr("Zoom out"));*/
 
         QActionGroup* viewMode = new QActionGroup(this);
         QAction* viewModeAll = new QAction(tr("&Both"), viewMode);
@@ -158,9 +159,9 @@ namespace SegWiz {
 
         QMenu* viewMenu = this->menuBar()->addMenu(tr("&View"));
         viewMenu->addAction(showCursor);
-        viewMenu->addSeparator();
+        /*viewMenu->addSeparator();
         viewMenu->addAction(zoomIn);
-        viewMenu->addAction(zoomOut);
+        viewMenu->addAction(zoomOut);*/
         viewMenu->addSeparator()->setText(tr("Current view"));
         viewMenu->addAction(viewModeAll);
         viewMenu->addAction(viewModeOverlay);
