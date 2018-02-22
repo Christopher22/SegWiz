@@ -51,7 +51,7 @@ namespace SegWiz {
             quint32 shapes() const;
 
         signals:
-            void shapeChanged();
+            void shapeChanged(const Shape::Shape* shape);
 
         private:
             Q_DISABLE_COPY(DrawingBuffer)
@@ -60,13 +60,13 @@ namespace SegWiz {
             void setEraser();
 
             QPixmap* m_buffer;
-            quint16 m_shapeSize;
-            QPainter m_painter;
+            Dataset *m_dataset;
 
             QVector<Shape::Shape*> m_shapes;
             int m_shapeId;
+            quint16 m_shapeSize;
 
-            Dataset *m_dataset;
+            QPainter m_painter;
         };
     }
 }

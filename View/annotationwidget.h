@@ -33,6 +33,8 @@ namespace SegWiz {
             void mousePressEvent(QMouseEvent *event) override;
 
         private:
+            Q_DISABLE_COPY(AnnotationWidget)
+
             void changeImage(const QImage& image);
 
             QPoint m_overlayPos;

@@ -48,6 +48,8 @@ namespace SegWiz {
             void dataChanged(const QImage& image);
 
         private:
+            Q_DISABLE_COPY(Dataset)
+
             class Location {
             public:
                 Location(const QDir& dir, const QStringList& include, const QStringList& exclude);

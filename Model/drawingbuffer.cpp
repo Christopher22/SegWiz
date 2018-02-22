@@ -12,7 +12,12 @@
 
 namespace SegWiz {
     namespace Model {
-        DrawingBuffer::DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent) : QObject(parent), m_buffer(new QPixmap(size)), m_shapeSize(10), m_painter(), m_shapes(), m_shapeId(0), m_dataset(dataset)
+        DrawingBuffer::DrawingBuffer(Dataset *dataset, const QSize& size, QObject *parent) :
+            QObject(parent),
+            m_buffer(new QPixmap(size)),
+            m_dataset(dataset),
+            m_shapeId(0),
+            m_shapeSize(10)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
 
@@ -81,11 +86,9 @@ namespace SegWiz {
         void DrawingBuffer::handleMouse(QWheelEvent *wheel)
         {
             if(wheel->angleDelta().y() > 0 && m_shapeSize < MAX_SHAPE_SIZE) {
-                ++m_shapeSize;
+                this->setShapeSize(m_shapeSize + 1);
             } else if(wheel->angleDelta().y() < 0 && m_shapeSize > MIN_SHAPE_SIZE) {
-                --m_shapeSize;
-            } else {
-                return;
+                this->setShapeSize(m_shapeSize - 1);
             }
         }
 
@@ -102,6 +105,8 @@ namespace SegWiz {
         void DrawingBuffer::setShapeSize(quint16 shapeSize)
         {
             m_shapeSize = shapeSize;
+            this->setLabel(m_dataset->currentLabel());
+            emit shapeChanged(m_shapes[m_shapeId]);
         }
 
         quint16 DrawingBuffer::width() const
@@ -123,7 +128,7 @@ namespace SegWiz {
         {
             if(shapeId < m_shapes.size()) {
                 m_shapeId = shapeId;
-                emit shapeChanged();
+                emit shapeChanged(m_shapes[m_shapeId]);
                 return true;
             } else {
                 return false;

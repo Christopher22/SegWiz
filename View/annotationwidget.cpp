@@ -15,7 +15,7 @@ namespace SegWiz {
             m_data(dataset),
             m_mode(ViewingMode::All),
             m_opacity(0.2),
-            m_overlayPen(QPen(QBrush(m_data->currentLabel()->color()), 5))
+            m_overlayPen(QPen(QBrush(m_data->currentLabel()->color()), 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin))
         {
             this->resize(300, 300);
             this->setMouseTracking(true);
@@ -28,7 +28,9 @@ namespace SegWiz {
                 this->repaint();
             });
 
-            connect(m_buffer, &Model::DrawingBuffer::shapeChanged, [this]() {
+            connect(m_buffer, &Model::DrawingBuffer::shapeChanged, [this](const Model::Shape::Shape* shape) {
+                Q_UNUSED(shape);
+                m_overlayPen.setWidth(m_buffer->shapeSize());
                 this->repaint();
             });
         }
@@ -42,11 +44,14 @@ namespace SegWiz {
                     painter.setOpacity(m_opacity);
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
 
-                    // Draw overlay
                     painter.setPen(m_overlayPen);
                     m_buffer->currentShape()->draw(&painter, m_overlayPos);
                 } else if (m_mode == ViewingMode::OverlayOnly) {
                     painter.drawPixmap(paint->rect(), m_buffer->image(), paint->rect());
+
+                    painter.setOpacity(m_opacity);
+                    painter.setPen(m_overlayPen);
+                    m_buffer->currentShape()->draw(&painter, m_overlayPos);
                 } else {
                     painter.drawImage(paint->rect(), m_currentImage, paint->rect());
                 }
