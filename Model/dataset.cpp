@@ -272,18 +272,18 @@ namespace SegWiz {
                         return false;
                     }
 
-                    for(; m_current < m_start; ++m_current) {
+                    do {
                         quint32 index = m_random.bounded(m_locations.size());
                         m_currentFile = m_locations[index]->nextImage(m_random);
                         if(!m_currentFile) {
                             delete m_locations[index];
                             m_locations.removeAt(index);
                         }
-                    }
+                        ++m_current;
+                    } while(m_current < m_start);
                 } while(!m_currentFile);
                 img = QImage(m_currentFile->fileName());
             } while(img.isNull());
-            ++m_current;
 
             if(m_scalingFactor != 1.0) {
                 img = img.scaled(img.size() * m_scalingFactor, Qt::KeepAspectRatio, Qt::SmoothTransformation);
