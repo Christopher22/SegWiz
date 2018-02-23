@@ -23,6 +23,7 @@ namespace SegWiz {
         void addFileMenu();
         void addAnnotationMenu();
         void addViewMenu();
+        void nextImage(bool save);
 
         Model::Dataset *m_data;
         View::AnnotationWidget *m_annotation;

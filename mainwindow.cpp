@@ -11,6 +11,8 @@
 #include <QWidgetAction>
 #include <QLabel>
 #include <QInputDialog>
+#include <QMessageBox>
+#include <QApplication>
 
 namespace SegWiz {
     MainWindow::MainWindow(Model::Dataset *dataset, QWidget *parent)
@@ -41,14 +43,14 @@ namespace SegWiz {
         saveAnnotation->setShortcut(QKeySequence(Qt::Key_Space));
         saveAnnotation->setStatusTip(tr("Annotate next image"));
         connect(saveAnnotation, &QAction::triggered, [this] {
-            m_data->next(true);
+            this->nextImage(true);
         });
 
         QAction* skipAnnotation = new QAction(tr("&Skip"), this);
         skipAnnotation->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space));
         skipAnnotation->setStatusTip(tr("Skip annotation"));
         connect(skipAnnotation, &QAction::triggered, [this] {
-            m_data->next(false);
+            this->nextImage(false);
         });
 
         QAction* closeSegWiz = new QAction(tr("&Close"), this);
@@ -121,14 +123,14 @@ namespace SegWiz {
         connect(markerVisibility, &QAction::triggered, [this] {
             bool ok;
             double newOpacity = QInputDialog::getDouble(this,
-                        tr("Set marker visibility"),
-                        tr("Please enter marker opacity (0: Hidden, 1: Completely visible):"),
-                        m_annotation->opacity(),
-                        0.0,
-                        1.0,
-                        2,
-                        &ok
-            );
+                                                        tr("Set marker visibility"),
+                                                        tr("Please enter marker opacity (0: Hidden, 1: Completely visible):"),
+                                                        m_annotation->opacity(),
+                                                        0.0,
+                                                        1.0,
+                                                        2,
+                                                        &ok
+                                                        );
             if (ok) {
                 m_annotation->setOpacity(newOpacity);
                 m_annotation->repaint();
@@ -188,5 +190,19 @@ namespace SegWiz {
         viewMenu->addAction(viewModeAll);
         viewMenu->addAction(viewModeOverlay);
         viewMenu->addAction(viewModeImage);
+    }
+
+    void MainWindow::nextImage(bool save)
+    {
+        if(!m_data->next(save)) {
+            m_annotation->setVisible(false);
+            QMessageBox::information(
+                        this,
+                        tr("Success"),
+                        tr("Congratulation: All samples were annotated. This application will close now."),
+                        QMessageBox::Ok
+                        );
+           QApplication::quit();
+        }
     }
 }
