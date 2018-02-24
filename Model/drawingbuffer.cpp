@@ -4,6 +4,7 @@
 #include "Shape/shape.h"
 #include "Shape/circle.h"
 #include "Shape/square.h"
+#include "Shape/roundedsquare.h"
 #include "dataset.h"
 #include "label.h"
 
@@ -31,6 +32,7 @@ namespace SegWiz {
             });
 
             m_shapes.append(new Shape::Square(this));
+            m_shapes.append(new Shape::RoundedSquare(this));
             m_shapes.append(new Shape::Circle(this));
 
             m_buffer->fill(Qt::transparent);
@@ -148,13 +150,13 @@ namespace SegWiz {
         void DrawingBuffer::setLabel(const Label *label)
         {
             m_painter.setBrush(QBrush(label->color(), Qt::SolidPattern));
-            m_painter.setPen(QPen(label->color(), m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            m_painter.setPen(QPen(label->color(), m_shapeSize, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         }
 
         void DrawingBuffer::setEraser()
         {
             m_painter.setBrush(Qt::transparent);
-            m_painter.setPen(QPen(Qt::transparent, m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            m_painter.setPen(QPen(Qt::transparent, m_shapeSize, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         }
 
         bool DrawingBuffer::annotateWithMovement() const

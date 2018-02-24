@@ -24,7 +24,8 @@ SOURCES += \
     Model/drawingbuffer.cpp \
     View/annotationwidget.cpp \
     Model/Shape/square.cpp \
-    Model/label.cpp
+    Model/label.cpp \
+    Model/Shape/roundedsquare.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -34,7 +35,8 @@ HEADERS += \
     Model/drawingbuffer.h \
     View/annotationwidget.h \
     Model/Shape/square.h \
-    Model/label.h
+    Model/label.h \
+    Model/Shape/roundedsquare.h
 
 DISTFILES += \
     README.md \
