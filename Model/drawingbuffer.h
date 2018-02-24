@@ -33,7 +33,7 @@ namespace SegWiz {
             void reset();
             void reset(const QSize& size);
 
-            void handleMouse(QMouseEvent *event);
+            void handleMouse(QMouseEvent *event, bool movement);
             void handleMouse(QWheelEvent *event);
 
             const QPixmap& image() const;
@@ -49,6 +49,9 @@ namespace SegWiz {
 
             const Shape::Shape *shape(quint16 shapeId) const;
             quint32 shapes() const;
+
+            bool annotateWithMovement() const;
+            void setAnnotateWithMovement(bool annotateWithMovement);
 
         signals:
             void shapeChanged(const Shape::Shape* shape);
@@ -67,6 +70,7 @@ namespace SegWiz {
             quint16 m_shapeSize;
 
             QPainter m_painter;
+            bool m_annotateWithMovement;
         };
     }
 }

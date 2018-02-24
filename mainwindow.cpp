@@ -67,6 +67,15 @@ namespace SegWiz {
 
     void MainWindow::addAnnotationMenu()
     {
+        QAction* annotateWithMove = new QAction(tr("&Annotate with movement"), this);
+        annotateWithMove->setCheckable(true);
+        annotateWithMove->setChecked(true);
+        annotateWithMove->setShortcut(QKeySequence(Qt::Key_M));
+        annotateWithMove->setStatusTip(tr("Annotate while moving the mouse and hold left button down"));
+        connect(annotateWithMove, &QAction::toggled, [this](bool checked) {
+            m_annotation->annotation()->setAnnotateWithMovement(checked);
+        });
+
         QActionGroup* labelGroup = new QActionGroup(this);
         for(quint32 i = 1; i < m_data->labels(); ++i) {
             QAction *labelAction = new QAction(m_data->label(i)->name(), labelGroup);
@@ -107,6 +116,7 @@ namespace SegWiz {
         });
 
         QMenu* annotationMenu = this->menuBar()->addMenu(tr("&Annotation"));
+        annotationMenu->addAction(annotateWithMove);
         annotationMenu->addSeparator()->setText(tr("Labels"));
         annotationMenu->addActions(labelGroup->actions());
         annotationMenu->addSeparator()->setText(tr("Shape"));
@@ -118,7 +128,7 @@ namespace SegWiz {
     void MainWindow::addViewMenu()
     {
         QAction* markerVisibility = new QAction(tr("&Set marker opacity"), this);
-        markerVisibility->setShortcut(QKeySequence(Qt::Key_M));
+        markerVisibility->setShortcut(QKeySequence(Qt::Key_O));
         markerVisibility->setStatusTip(tr("Set the opacity of the marker"));
         connect(markerVisibility, &QAction::triggered, [this] {
             bool ok;

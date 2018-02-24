@@ -66,9 +66,9 @@ namespace SegWiz {
             this->setLabel(m_dataset->currentLabel());
         }
 
-        void DrawingBuffer::handleMouse(QMouseEvent *mouse)
+        void DrawingBuffer::handleMouse(QMouseEvent *mouse, bool movement)
         {
-            if (mouse->buttons() & Qt::LeftButton) {
+            if ((!movement || m_annotateWithMovement) && mouse->buttons() & Qt::LeftButton) {
                 m_shapes[m_shapeId]->draw(&m_painter, mouse->pos());
             } else if(mouse->buttons() & Qt::RightButton) {
                 this->setEraser();
@@ -155,6 +155,16 @@ namespace SegWiz {
         {
             m_painter.setBrush(Qt::transparent);
             m_painter.setPen(QPen(Qt::transparent, m_shapeSize, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        }
+
+        bool DrawingBuffer::annotateWithMovement() const
+        {
+            return m_annotateWithMovement;
+        }
+
+        void DrawingBuffer::setAnnotateWithMovement(bool annotateWithMovement)
+        {
+            m_annotateWithMovement = annotateWithMovement;
         }
     }
 }

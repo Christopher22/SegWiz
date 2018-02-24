@@ -68,7 +68,7 @@ namespace SegWiz {
         {
             m_overlayPos = event->pos();
             if (m_mode != ViewingMode::ImageOnly) {
-                m_buffer->handleMouse(event);
+                m_buffer->handleMouse(event, false);
                 this->repaint();
             }
         }
@@ -77,7 +77,7 @@ namespace SegWiz {
         {
             m_overlayPos = event->pos();
             if (m_mode != ViewingMode::ImageOnly) {
-                m_buffer->handleMouse(event);
+                m_buffer->handleMouse(event, true);
                 this->repaint();
             }
         }
