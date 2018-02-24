@@ -37,4 +37,5 @@ HEADERS += \
     Model/label.h
 
 DISTFILES += \
-    README.md
+    README.md \
+    LICENSE
