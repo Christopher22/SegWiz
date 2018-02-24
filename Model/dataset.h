@@ -16,10 +16,19 @@ namespace SegWiz {
         {
             Q_OBJECT
         public:
+            enum class LoadingStatus {
+                Success,
+                FileError,
+                ParsingError,
+                InputError,
+                OutputError,
+                MissingInformation
+            };
+
             explicit Dataset(const QDir& output, const QString& outputFilename="%1.png", QObject *parent = nullptr);
             virtual ~Dataset();
 
-            static Dataset *load(QFile* file, QObject *parent = nullptr);
+            static LoadingStatus load(QFile* file, Dataset **result, QObject *parent = nullptr);
             bool save(QFile* file) const;
 
             bool addImages(const QDir &dir, const QStringList &include = {"*.bmp", "*.png", "*.jpg"}, const QStringList &exclude = QStringList());

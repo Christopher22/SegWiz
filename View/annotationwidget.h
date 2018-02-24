@@ -17,7 +17,7 @@ namespace SegWiz {
             Q_ENUMS(ViewingMode)
 
         public:
-            enum ViewingMode { All, OverlayOnly, ImageOnly };
+            enum class ViewingMode { All, OverlayOnly, ImageOnly };
 
             explicit AnnotationWidget(Model::Dataset *dataset, QWidget *parent = nullptr);
 

@@ -21,14 +21,42 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("file", "An file in JSON format describing the targets of the annotation.");
     parser.process(app);
 
+    if(parser.positionalArguments().length() < 1) {
+        parser.showHelp(-1);
+    }
+
     SegWiz::Model::Dataset *data = nullptr;
-    QFile* file = nullptr;
-    if(parser.positionalArguments().length() > 0 && (file = new QFile(parser.positionalArguments().at(0)))->exists() && (data = SegWiz::Model::Dataset::load(file))) {
+    QFile* file = new QFile(parser.positionalArguments().at(0));
+
+    switch (SegWiz::Model::Dataset::load(file, &data)) {
+    case SegWiz::Model::Dataset::LoadingStatus::Success: {
         SegWiz::MainWindow w(data);
         w.show();
         return app.exec();
-    } else {
-        std::cerr << "The description file does not exist or is corruped!";
+    }
+    case SegWiz::Model::Dataset::LoadingStatus::FileError: {
+        qCritical("The description file does not exist or could not be opened!");
         return -1;
     }
+    case SegWiz::Model::Dataset::LoadingStatus::OutputError: {
+        qCritical("The output folder does not exist and could bot be created!");
+        return -1;
+    }
+    case SegWiz::Model::Dataset::LoadingStatus::InputError: {
+        qCritical("The output folder does not exist and could bot be created!");
+        return -1;
+    }
+    case SegWiz::Model::Dataset::LoadingStatus::ParsingError: {
+        qCritical("The content of the description file was invalid!");
+        return -1;
+    }
+    case SegWiz::Model::Dataset::LoadingStatus::MissingInformation: {
+        qCritical("The description file does not contain all required information!");
+        return -1;
+    }
+    default:
+        break;
+    }
+
+    return -1;
 }

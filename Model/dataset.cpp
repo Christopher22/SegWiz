@@ -88,44 +88,43 @@ namespace SegWiz {
             return true;
         }
 
-        Dataset *Dataset::load(QFile* file, QObject *parent)
+        Dataset::LoadingStatus Dataset::load(QFile* file, Dataset **result, QObject *parent)
         {
             if(!file->open(QFile::ReadOnly)) {
-                return nullptr;
+                return LoadingStatus::FileError;
             }
 
             QJsonDocument input(QJsonDocument::fromJson(file->readAll()));
             file->close();
 
             if(input.isNull()) {
-                return nullptr;
+                return LoadingStatus::ParsingError;
             }
 
             QJsonObject config(input.object());
             if(!config["output"].isObject() || !config["input"].isArray()) {
-                return nullptr;
+                return LoadingStatus::MissingInformation;
             }
 
             QJsonObject outputObject(config["output"].toObject());
-            QDir output(outputObject["path"].toString("/invalid/"));
+            QDir output(outputObject["path"].toString());
             QString outputPattern(outputObject["pattern"].toString("%1.png"));
-            if(!output.exists()) {
-                qWarning("The output folder does not exists!");
-                return nullptr;
+            if(!outputObject["path"].isString() || (!output.exists() && !output.mkpath("."))) {
+                return LoadingStatus::OutputError;
             }
 
-            Dataset *data = new Dataset(output, outputPattern, parent);
+            *result = new Dataset(output, outputPattern, parent);
             for(const QJsonValue& inputElement: config["input"].toArray()) {
                 QJsonObject inputObject(inputElement.toObject());
                 if(!inputElement.isObject() || !inputObject["path"].isString() || !inputObject["include"].isArray() || !inputObject["exclude"].isArray()) {
-                    delete data;
-                    return nullptr;
+                    delete *result;
+                    return LoadingStatus::MissingInformation;
                 }
 
                 QDir input(inputObject["path"].toString());
                 if(!input.exists()) {
-                    qWarning() << "The input folder " << input << "does not exists!";
-                    return nullptr;
+                    delete *result;
+                    return LoadingStatus::InputError;
                 }
 
                 QStringList include;
@@ -138,37 +137,37 @@ namespace SegWiz {
                     exclude.append(currentExclude.toString());
                 }
 
-                data->addImages(input, include, exclude);
+                (*result)->addImages(input, include, exclude);
             }
 
             for(const QJsonValue& labelElement: config["labels"].toArray()) {
                 QJsonObject labelObject(labelElement.toObject());
                 if(!labelElement.isObject() || !labelElement["name"].isString() || !labelElement["color"].isObject()) {
-                    delete data;
-                    return nullptr;
+                    delete *result;
+                    return LoadingStatus::MissingInformation;
                 }
 
                 QJsonObject color(labelElement["color"].toObject());
-                data->addLabel(labelElement["name"].toString(), QColor(quint32(color["r"].toDouble()), quint32(color["g"].toDouble()), quint32(color["b"].toDouble())));
+                (*result)->addLabel(labelElement["name"].toString(), QColor(quint32(color["r"].toDouble()), quint32(color["g"].toDouble()), quint32(color["b"].toDouble())));
             }
 
             if(config["start"].isDouble()) {
-                data->setStart(config["start"].toDouble());
+                (*result)->setStart(config["start"].toDouble());
             }
 
             if(config["end"].isDouble()) {
-                data->setEnd(config["end"].toDouble());
+                (*result)->setEnd(config["end"].toDouble());
             }
 
             if(config["seed"].isDouble()) {
-                data->setSeed(config["seed"].toDouble());
+                (*result)->setSeed(config["seed"].toDouble());
             }
 
             if(config["scaling"].isDouble()) {
-                data->setScalingFactor(config["scaling"].toDouble());
+                (*result)->setScalingFactor(config["scaling"].toDouble());
             }
 
-            return data;
+            return LoadingStatus::Success;
         }
 
         bool Dataset::addImages(const QDir &dir, const QStringList &include, const QStringList &exclude)
