@@ -46,6 +46,7 @@ namespace SegWiz {
         // Show first image
         m_data->next(false);
     }
+
     void MainWindow::addFileMenu()
     {
         QAction* saveAnnotation = new QAction(tr("&Save"), this);
@@ -57,14 +58,14 @@ namespace SegWiz {
 
         QAction* skipAnnotation = new QAction(tr("&Skip"), this);
         skipAnnotation->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space));
-        skipAnnotation->setStatusTip(tr("Skip annotation"));
+        skipAnnotation->setStatusTip(tr("Skip current annotation"));
         connect(skipAnnotation, &QAction::triggered, [this] {
             this->nextImage(false);
         });
 
         QAction* closeSegWiz = new QAction(tr("&Close"), this);
         closeSegWiz->setShortcut(QKeySequence::Close);
-        closeSegWiz->setStatusTip(tr("Closes SegWiz"));
+        closeSegWiz->setStatusTip(tr("Close SegWiz"));
         connect(closeSegWiz, &QAction::triggered, this, &QMainWindow::close);
 
         QMenu* fileMenu = this->menuBar()->addMenu(tr("&File"));
@@ -94,7 +95,12 @@ namespace SegWiz {
             labelAction->setIcon(QIcon(color));
 
             labelAction->setCheckable(true);
-            labelAction->setShortcut(QKeySequence(QString::number(i)));
+            labelAction->setStatusTip(tr("Annotate \"%1\"").arg(labelAction->text()));
+
+            if(i < 10) {
+                labelAction->setShortcut(QKeySequence(QString::number(i)));
+            }
+
             connect(labelAction, &QAction::triggered, [this, i] {
                 this->m_data->setCurrentLabel(i);
             });
@@ -109,6 +115,8 @@ namespace SegWiz {
             QAction *shapeAction = new QAction(this->m_annotation->annotation()->shape(i)->name(), shapeGroup);
             shapeAction->setCheckable(true);
             shapeAction->setShortcut(QKeySequence(QString("Ctrl+%1").arg(i + 1)));
+            shapeAction->setStatusTip(tr("Annotate with \"%1\"").arg(shapeAction->text()));
+
             connect(shapeAction, &QAction::triggered, [this, i] {
                 this->m_annotation->annotation()->setCurrentShape(i);
             });

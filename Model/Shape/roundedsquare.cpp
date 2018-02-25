@@ -20,7 +20,7 @@ namespace SegWiz {
 
             QString RoundedSquare::name() const
             {
-                return QString("RoundedSquare");
+                return QString("Squircle");
             }
         }
     }
