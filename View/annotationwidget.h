@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QImage>
 #include <QPen>
+
+class QFile;
+
 namespace SegWiz {
     namespace Model {
         class DrawingBuffer;
@@ -39,7 +42,7 @@ namespace SegWiz {
         private:
             Q_DISABLE_COPY(AnnotationWidget)
 
-            void changeImage(const QImage& image);
+            void changeImage(const QFile *_file, const QImage& image);
 
             QPoint m_overlayPos;
             Model::DrawingBuffer *m_buffer;

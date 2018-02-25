@@ -13,19 +13,26 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QApplication>
+#include <QStatusBar>
 
 namespace SegWiz {
     MainWindow::MainWindow(Model::Dataset *dataset, QWidget *parent)
-        : QMainWindow(parent), m_data(dataset), m_annotation(new View::AnnotationWidget(m_data, this))
+        : QMainWindow(parent), m_data(dataset), m_annotation(new View::AnnotationWidget(m_data, this)), m_statusBarLabel(new QLabel("SegWiz", this))
     {
-        Q_ASSERT(dataset);
+        Q_ASSERT(m_data);
 
         this->setCentralWidget(m_annotation);
         this->setFixedSize(m_annotation->size());
 
-        connect(dataset, &Model::Dataset::dataChanged, [this](const QImage& image) {
-            this->setFixedSize(image.width(), image.height() + this->menuBar()->height());
-            this->setWindowTitle(QString("SegWiz: %1").arg(m_data->currentElement(), 3, 10, QChar('0')));
+        connect(m_data, &Model::Dataset::dataChanged, [this](const QFile* file, const QImage& image) {
+            this->setFixedSize(image.width(), image.height() + this->menuBar()->height() + this->statusBar()->height());
+
+            QString end(QString::number(m_data->end(), 10));
+            m_statusBarLabel->setText(
+                        QString("Image %2/%3: \"%1\"")
+                        .arg(file->fileName().rightRef(file->fileName().size() - file->fileName().lastIndexOf('/') - 1))
+                        .arg(m_data->currentElement(), end.size(), 10, QChar('0'))
+                        .arg(end));
         });
 
         // Add menu
@@ -33,10 +40,12 @@ namespace SegWiz {
         this->addAnnotationMenu();
         this->addViewMenu();
 
+        this->statusBar()->addPermanentWidget(m_statusBarLabel);
+        this->statusBar()->setSizeGripEnabled(false);
+
         // Show first image
         m_data->next(false);
     }
-
     void MainWindow::addFileMenu()
     {
         QAction* saveAnnotation = new QAction(tr("&Save"), this);
@@ -212,7 +221,7 @@ namespace SegWiz {
                         tr("Congratulation: All samples were annotated. This application will close now."),
                         QMessageBox::Ok
                         );
-           QApplication::quit();
+            QApplication::quit();
         }
     }
 }

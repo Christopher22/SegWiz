@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+class QLabel;
 namespace SegWiz {
     namespace View {
         class AnnotationWidget;
@@ -27,6 +28,7 @@ namespace SegWiz {
 
         Model::Dataset *m_data;
         View::AnnotationWidget *m_annotation;
+        QLabel *m_statusBarLabel;
     };
 }
 

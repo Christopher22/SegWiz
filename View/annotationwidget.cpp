@@ -82,8 +82,9 @@ namespace SegWiz {
             }
         }
 
-        void AnnotationWidget::changeImage(const QImage &image)
+        void AnnotationWidget::changeImage(const QFile* _file, const QImage &image)
         {
+            Q_UNUSED(_file);
             Q_ASSERT(!image.isNull());
 
             m_currentImage = image;

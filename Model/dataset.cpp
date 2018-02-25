@@ -288,7 +288,7 @@ namespace SegWiz {
                 img = img.scaled(img.size() * m_scalingFactor, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             }
 
-            emit dataChanged(img);
+            emit dataChanged(m_currentFile, img);
             return true;
         }
 

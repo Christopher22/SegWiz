@@ -58,7 +58,7 @@ namespace SegWiz {
         signals:
             void saveAnnotation(QImage &output);
             void labelChanged(const Label* label);
-            void dataChanged(const QImage& image);
+            void dataChanged(const QFile* file, const QImage& image);
 
         private:
             Q_DISABLE_COPY(Dataset)
