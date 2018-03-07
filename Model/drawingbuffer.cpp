@@ -18,7 +18,8 @@ namespace SegWiz {
             m_buffer(new QPixmap(size)),
             m_dataset(dataset),
             m_shapeId(0),
-            m_shapeSize(10)
+            m_shapeSize(10),
+            m_annotateWithMovement(true)
         {
             Q_ASSERT(dataset && dataset->currentLabel());
 
