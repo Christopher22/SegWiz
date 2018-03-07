@@ -107,6 +107,7 @@ namespace SegWiz {
             }
 
             QJsonDocument input(QJsonDocument::fromJson(file->readAll()));
+            QFileInfo configFileInfo(*file);
             file->close();
 
             if(input.isNull()) {
@@ -120,6 +121,10 @@ namespace SegWiz {
 
             QJsonObject outputObject(config["output"].toObject());
             QDir output(outputObject["path"].toString());
+            if(!output.isAbsolute()) {
+                output = QDir::cleanPath(configFileInfo.dir().absoluteFilePath(output.path()));
+            }
+
             QString outputPattern(outputObject["pattern"].toString("%1.png"));
             if(!outputObject["path"].isString() || (!output.exists() && !output.mkpath("."))) {
                 return LoadingStatus::OutputError;
@@ -134,6 +139,10 @@ namespace SegWiz {
                 }
 
                 QDir input(inputObject["path"].toString());
+                if(!input.isAbsolute()) {
+                    input = QDir::cleanPath(configFileInfo.dir().absoluteFilePath(input.path()));
+                }
+
                 if(!input.exists()) {
                     delete *result;
                     return LoadingStatus::InputError;
