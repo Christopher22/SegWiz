@@ -25,11 +25,10 @@ namespace SegWiz {
                 MissingInformation
             };
 
-            explicit Dataset(const QDir& output, const QString& outputFilename="%1.png", QObject *parent = nullptr);
             virtual ~Dataset();
 
             static LoadingStatus load(QFile* file, Dataset **result, QObject *parent = nullptr);
-            bool save(QFile* file) const;
+            bool save(QFile* file = nullptr);
 
             bool addImages(const QDir &dir, const QStringList &include = {"*.bmp", "*.png", "*.jpg"}, const QStringList &exclude = QStringList());
             void addLabel(const QString& name, const QColor& color);
@@ -55,10 +54,16 @@ namespace SegWiz {
             bool setScalingFactor(qreal scalingFactor);
 
             quint32 currentElement() const;
+
+            const QFile *filename() const;
+
         signals:
             void saveAnnotation(QImage &output);
             void labelChanged(const Label* label);
             void dataChanged(const QFile* file, const QImage& image);
+
+        protected:
+            explicit Dataset(QFile *filename, const QDir& output, const QString& outputFilename="%1.png", QObject *parent = nullptr);
 
         private:
             Q_DISABLE_COPY(Dataset)
@@ -79,6 +84,7 @@ namespace SegWiz {
                 QStringList m_files;
             };
 
+            QFile* m_filename;
             quint32 m_seed;
             QRandomGenerator m_random;
             quint32 m_current, m_start, m_end;

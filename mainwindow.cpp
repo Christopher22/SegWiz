@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QStatusBar>
+#include <QFileDialog>
 
 namespace SegWiz {
     MainWindow::MainWindow(Model::Dataset *dataset, QWidget *parent)
@@ -49,18 +50,39 @@ namespace SegWiz {
 
     void MainWindow::addFileMenu()
     {
-        QAction* saveAnnotation = new QAction(tr("&Save"), this);
+        QAction* saveAnnotation = new QAction(tr("&Next image"), this);
         saveAnnotation->setShortcut(QKeySequence(Qt::Key_Space));
         saveAnnotation->setStatusTip(tr("Annotate next image"));
         connect(saveAnnotation, &QAction::triggered, [this] {
             this->nextImage(true);
         });
 
-        QAction* skipAnnotation = new QAction(tr("&Skip"), this);
+        QAction* skipAnnotation = new QAction(tr("&Skip image"), this);
         skipAnnotation->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space));
         skipAnnotation->setStatusTip(tr("Skip current annotation"));
         connect(skipAnnotation, &QAction::triggered, [this] {
             this->nextImage(false);
+        });
+
+        QAction* saveDataset = new QAction(tr("&Save"), this);
+        saveDataset->setShortcut(QKeySequence::Save);
+        saveDataset->setStatusTip(tr("Save dataset"));
+        connect(saveDataset, &QAction::triggered, [this] {
+            if(!m_data->save()) {
+                QMessageBox::warning(this, tr("Saving issue"), tr("Saving of the file failed."));
+            }
+        });
+
+        QAction* saveAsDataset = new QAction(tr("&Save as..."), this);
+        saveAsDataset->setShortcut(QKeySequence::SaveAs);
+        saveAsDataset->setStatusTip(tr("Save dataset as ..."));
+        connect(saveAsDataset, &QAction::triggered, [this] {
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("Dataset (*.segwiz)"));
+            QFile* file = new QFile(fileName);
+            if(fileName.length() > 0 && !m_data->save(file)) {
+                QMessageBox::warning(this, tr("Saving issue"), tr("Saving of the file failed."));
+            }
+            delete file;
         });
 
         QAction* closeSegWiz = new QAction(tr("&Close"), this);
@@ -68,9 +90,13 @@ namespace SegWiz {
         closeSegWiz->setStatusTip(tr("Close SegWiz"));
         connect(closeSegWiz, &QAction::triggered, this, &QMainWindow::close);
 
-        QMenu* fileMenu = this->menuBar()->addMenu(tr("&File"));
+        QMenu* fileMenu = this->menuBar()->addMenu(tr("&Dataset"));
+        fileMenu->addAction(saveDataset);
+        fileMenu->addAction(saveAsDataset);
+        fileMenu->addSeparator();
         fileMenu->addAction(saveAnnotation);
         fileMenu->addAction(skipAnnotation);
+        fileMenu->addSeparator();
         fileMenu->addSeparator();
         fileMenu->addAction(closeSegWiz);
     }

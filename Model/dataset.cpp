@@ -9,16 +9,19 @@
 
 namespace SegWiz {
     namespace Model {
-        Dataset::Dataset(const QDir &output, const QString &outputFilename, QObject *parent) :
+        Dataset::Dataset(QFile *filename, const QDir &output, const QString &outputFilename, QObject *parent) :
             QObject(parent),
+            m_filename(filename),
             m_seed(QRandomGenerator::global()->generate()),
             m_random(QRandomGenerator(m_seed)),
+            m_start(0),
             m_currentLabel(0),
             m_currentFile(nullptr),
             m_output(output),
             m_outputFileFormat(outputFilename)
         {
             Q_ASSERT(output.exists());
+            Q_ASSERT(filename->exists());
 
             if(!outputFilename.contains("%1")) {
                 qWarning("Invalid pattern. Using default.");
@@ -26,6 +29,8 @@ namespace SegWiz {
             }
 
             m_labels.append(new Label("Background", QColor(0, 0, 0, 0)));
+
+            m_filename->setParent(this);
         }
 
         Dataset::~Dataset()
@@ -41,8 +46,15 @@ namespace SegWiz {
             }
         }
 
-        bool Dataset::save(QFile* file) const
+        bool Dataset::save(QFile* file)
         {
+            if(file == nullptr) {
+                file = m_filename;
+            } else {
+                m_filename = file;
+                m_filename->setParent(this);
+            }
+
             if(!file->open(QFile::WriteOnly)) {
                 return false;
             }
@@ -113,7 +125,7 @@ namespace SegWiz {
                 return LoadingStatus::OutputError;
             }
 
-            *result = new Dataset(output, outputPattern, parent);
+            *result = new Dataset(file, output, outputPattern, parent);
             for(const QJsonValue& inputElement: config["input"].toArray()) {
                 QJsonObject inputObject(inputElement.toObject());
                 if(!inputElement.isObject() || !inputObject["path"].isString() || !inputObject["include"].isArray() || !inputObject["exclude"].isArray()) {
@@ -331,6 +343,11 @@ namespace SegWiz {
         quint32 Dataset::currentElement() const
         {
             return m_current;
+        }
+
+        const QFile *Dataset::filename() const
+        {
+            return m_filename;
         }
 
         Dataset::Location::Location(const QDir &dir, const QStringList &include, const QStringList &exclude):

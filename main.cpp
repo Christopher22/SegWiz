@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     case SegWiz::Model::Dataset::LoadingStatus::InputError: {
-        qCritical("The output folder does not exist and could bot be created!");
+        qCritical("The input folder does not exist and could bot be created!");
         return -1;
     }
     case SegWiz::Model::Dataset::LoadingStatus::ParsingError: {
@@ -55,8 +55,6 @@ int main(int argc, char *argv[])
         return -1;
     }
     default:
-        break;
-    }
-
-    return -1;
+        return -1;
+    }   
 }
